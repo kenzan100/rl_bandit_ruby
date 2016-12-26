@@ -22,8 +22,8 @@ num_of_runs_per_problem = 1_000
 analyzers = []
 players.each do |player|
   analyzer = Bandit::Analyzer.new(player: player)
-  num_of_runs_per_problem.times do |run_i|
-    bandits.each do |bandit|
+  bandits.each do |bandit|
+    num_of_runs_per_problem.times do |run_i|
       analyzer.add(run: run_i, result: player.plays(bandit))
     end
   end
