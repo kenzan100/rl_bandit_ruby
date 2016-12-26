@@ -3,6 +3,8 @@ require_relative 'bandit_player'
 require_relative 'bandit_analyzer'
 
 require 'byebug'
+require 'pry-byebug'
+require 'pp'
 
 def create_machines(how_many:, arm_num:)
   how_many.times.map do |i|
@@ -26,14 +28,13 @@ players.each do |player|
   analyzer = Bandit::Analyzer.new(player: player)
   bandits.each do |bandit|
     num_of_runs_per_problem.times do |run_i|
-      puts("#{bandit.id}, #{run_i} ") if run_i % 10 == 0
       analyzer.add(run: run_i, result: player.plays(bandit))
     end
   end
   analyzers << analyzer
 end
 
-step = (num_of_runs_per_problem / 100)
+step = (num_of_runs_per_problem / 10)
 sample_runs_i = num_of_runs_per_problem.times.select { |i| i % step == 0 }
 sample_runs_i.each do |sample_run_i|
   analyzers.each do |analyzer|

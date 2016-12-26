@@ -18,6 +18,10 @@ module Bandit
       reward
     end
 
+    def id
+      "#{@how_greedy}"
+    end
+
     private
 
     def find_or_initialize_bandit_memories(bandit)
@@ -27,7 +31,7 @@ module Bandit
     end
 
     def bandit_memories
-      @bandit_memories ||= Hash.new(BanditMemory.new)
+      @bandit_memories ||= Hash.new { |h, k| h[k] = BanditMemory.new }
     end
 
     def greedy_this_time
@@ -51,7 +55,7 @@ module Bandit
       end
 
       def random_action
-        actions.sample
+        actions.values.sample
       end
 
       def actions
