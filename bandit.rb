@@ -18,10 +18,13 @@ def spawn_players(greedy_values:)
   end
 end
 
-bandits = create_machines(how_many: 10, arm_num: 10)
+# NOTE: the book suggests the machine number to be 2_000,
+# number of runs per machine to be 1_000, but this may take quite some time
+# to calculate the values.
+bandits = create_machines(how_many: 2000, arm_num: 10)
 players = spawn_players(greedy_values: [1, 0.99, 0.9])
 
-num_of_runs_per_problem = 100
+num_of_runs_per_problem = 1000
 
 analyzers = []
 players.each do |player|
