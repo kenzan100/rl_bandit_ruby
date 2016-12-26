@@ -1,11 +1,13 @@
 module Bandit
   class Analyzer
+    attr_reader :rewards
+
     def initialize(player:)
     end
 
     def add(run:, result:)
       @rewards ||= Hash.new([])
-      @rewards[run.to_i] << result
+      @rewards[run.to_i] = @rewards[run.to_i] << result
     end
 
     def average_rewards(at:)

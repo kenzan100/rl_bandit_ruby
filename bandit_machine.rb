@@ -1,9 +1,10 @@
-require 'distribution'
+require 'rubystats'
 
 module Bandit
   class Machine
-    def initialize(seed:, arm_num:)
+    def initialize(arm_num:, name:)
       @arm_num = arm_num
+      @name = name
       actions
     end
 
@@ -11,10 +12,18 @@ module Bandit
       actions[action].reward
     end
 
+    def id
+      @name
+    end
+
+    def action_values
+      actions.keys
+    end
+
     private
 
     def actions
-      @actions ||= arm_num.times.reduce({}) { |acc, num|
+      @actions ||= @arm_num.times.reduce({}) { |acc, num|
         acc[num] = Action.new
         acc
       }
@@ -22,11 +31,11 @@ module Bandit
 
     class Action
       def initialize
-        @true_reward = Distribution::Normal.rng.call
+        @true_reward = Rubystats::NormalDistribution.new(0, 1).rng
       end
 
       def reward
-        Distribution::Normal.rng(mean: @true_reward).call
+        Rubystats::NormalDistribution.new(@true_reward, 1).rng
       end
     end
   end

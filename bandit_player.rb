@@ -5,7 +5,7 @@ module Bandit
     end
 
     def plays(bandit)
-      bandit_memory = bandit_memories[bandit.id]
+      bandit_memory = find_or_initialize_bandit_memories(bandit)
 
       action = if greedy_this_time
                  bandit_memory.best_action
@@ -13,14 +13,21 @@ module Bandit
                  bandit_memory.random_action
                end
 
-      reward = bandit.receive(action)
-      bandit_memory.re_evaluate(action, with: reward)
+      reward = bandit.receive(action.id)
+      bandit_memory.re_evaluate(action.id, with: reward)
+      reward
     end
 
     private
 
+    def find_or_initialize_bandit_memories(bandit)
+      memory = bandit_memories[bandit.id]
+      memory.actions = bandit.action_values if memory.empty?
+      memory
+    end
+
     def bandit_memories
-      { id: bandit_memory }
+      @bandit_memories ||= Hash.new(BanditMemory.new)
     end
 
     def greedy_this_time
@@ -33,10 +40,14 @@ module Bandit
         actions[action].values << reward
       end
 
+      def empty?
+        actions.empty?
+      end
+
       def best_action
-        cur_max = actions.max_by(&:average).average
-        max_actions = actions.select { |action| action.average == cur_max }
-        max_actions.sample
+        cur_max = actions.max_by { |_k, action| action.average }[1].average
+        max_actions = actions.select { |_k, action| action.average == cur_max }
+        max_actions.values.sample
       end
 
       def random_action
@@ -44,16 +55,33 @@ module Bandit
       end
 
       def actions
-        @actions ||= Hash.new(Action.new)
+        @actions ||= Hash.new
+      end
+
+      def actions=(action_values)
+        @actions = action_values.reduce({}) { |acc, val|
+          acc[val] = Action.new(id: val)
+          acc
+        }
       end
 
       class Action
+        def initialize(id:)
+          @id = id
+        end
+
+        def id
+          @id
+        end
+
         def values
           @values ||= []
         end
 
         def average
-          values.reduce(&:+) / values.length
+          (values.reduce(&:+) || 0) / values.length
+        rescue ZeroDivisionError
+          0
         end
       end
     end
